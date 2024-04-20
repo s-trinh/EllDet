@@ -41,6 +41,7 @@ double EllipseDetector::IsGoodArc(const std::vector<Point> &arc)
 void EllipseDetector::SplitCurvesToArcs()
 {
     const VVP &curves = info_.curves;
+    std::cout << "curves=" << curves.size() << std::endl;
     VVP &arcs = info_.arcs;
     auto &ags = info_.angles;
 

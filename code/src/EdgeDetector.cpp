@@ -34,33 +34,33 @@ void Collecting(Mat1b &image, VVP &segments, int min_length)
 {
     auto corner = image.clone();
 
-    // for (int y = 0; y < image.rows; y++)
-    // {
-    // 	for (int x = 0; x < image.cols; x++)
-    // 	{
-    // 		if (!image(y, x))
-    // 		{
-    // 			continue;
-    // 		}
-    // 		int a = 0, b = 0;
-    // 		for (int i = 0; i < 4; i++)
-    // 		{
-    // 			int tx = x + dx[i], ty = y + dy[i];
-    // 			if (tx>=0&&ty>=0&&tx< image.cols&&ty< image.rows&&image(ty,tx))
-    // 				a++;
-    // 		}
-    // 		for (int i = 4; i < 8; i++)
-    // 		{
-    // 			int tx = x + dx[i], ty = y + dy[i];
-    // 			if (tx >= 0 && ty >= 0 && tx < image.cols && ty < image.rows && image(ty,tx))
-    // 				b++;
-    // 		}
-    // 		if (a > 2 || b > 2)
-    // 			corner(y, x) = 0;
-    // 		else
-    // 			corner(y, x) = 0;
-    // 	}
-    // }
+    for (int y = 0; y < image.rows; y++)
+    {
+        for (int x = 0; x < image.cols; x++)
+        {
+            if (!image(y, x))
+            {
+                continue;
+            }
+            int a = 0, b = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                int tx = x + dx[i], ty = y + dy[i];
+                if (tx >= 0 && ty >= 0 && tx < image.cols && ty < image.rows && image(ty, tx))
+                    a++;
+            }
+            for (int i = 4; i < 8; i++)
+            {
+                int tx = x + dx[i], ty = y + dy[i];
+                if (tx >= 0 && ty >= 0 && tx < image.cols && ty < image.rows && image(ty, tx))
+                    b++;
+            }
+            if (a > 2 || b > 2)
+                corner(y, x) = 0;
+            else
+                corner(y, x) = 0;
+        }
+    }
 
     auto vis = image.clone();
     for (int y = 0; y < vis.rows; y++)
@@ -110,10 +110,23 @@ void EdgeDetector::MarkEdgeCanny(const Mat1b &image, Mat1b &edge, cv::Mat2f &dir
     Mat1s dx, dy;
     Sobel(image, dx, CV_16S, 1, 0);
     Sobel(image, dy, CV_16S, 0, 1);
+
+    Mat1b abs_grad_x, abs_grad_y, grad;
+    convertScaleAbs(dx, abs_grad_x);
+    convertScaleAbs(dy, abs_grad_y);
+    addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad);
+    // imshow("grad", grad);
+
     int threshold_low, threshold_high;
     ComputeThreshold(dx, dy, threshold_low, threshold_high);
+    std::cout << "threshold_low=" << threshold_low << " ; threshold_high=" << threshold_high << std::endl;
 
     cv::Canny(dx, dy, edge, threshold_low, threshold_high);
+    cv::imshow("pre edge", edge);
+
+    Mat1f direction_x = Mat1f::zeros(edge.rows, edge.cols), direction_y = Mat1f::zeros(edge.rows, edge.cols);
+    std::cout << "direction_x=" << direction_x.rows << "x" << direction_x.cols << std::endl;
+    std::cout << "direction_y=" << direction_y.rows << "x" << direction_y.cols << std::endl;
 
     for (int i = 0; i < edge.rows; ++i)
     {
@@ -125,9 +138,13 @@ void EdgeDetector::MarkEdgeCanny(const Mat1b &image, Mat1b &edge, cv::Mat2f &dir
                 if (len != 0)
                 {
                     direction(i, j) = Point2f(dx(i, j) / len, dy(i, j) / len);
+                    direction_x(i, j) = dx(i, j) / len;
+                    direction_y(i, j) = dy(i, j) / len;
                 }
                 else
+                {
                     direction(i, j) = Point2f(0, 0);
+                }
                 edge(i, j) = 255;
             }
             else
@@ -136,6 +153,14 @@ void EdgeDetector::MarkEdgeCanny(const Mat1b &image, Mat1b &edge, cv::Mat2f &dir
             }
         }
     }
+
+    // cv::imshow("post edge", edge);
+
+    Mat1b direction_x_8u, direction_y_8u;
+    convertScaleAbs(direction_x, direction_x_8u, 255);
+    convertScaleAbs(direction_y, direction_y_8u, 255);
+    imshow("direction_x_8u", direction_x_8u);
+    imshow("direction_y_8u", direction_y_8u);
 }
 
 void EdgeDetector::ComputeThreshold(const Mat1b &dx, const Mat1b &dy, int &threshold_low,
