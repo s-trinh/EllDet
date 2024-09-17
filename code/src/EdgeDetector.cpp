@@ -119,14 +119,14 @@ void EdgeDetector::MarkEdgeCanny(const Mat1b &image, Mat1b &edge, cv::Mat2f &dir
 
     int threshold_low, threshold_high;
     ComputeThreshold(dx, dy, threshold_low, threshold_high);
-    std::cout << "threshold_low=" << threshold_low << " ; threshold_high=" << threshold_high << std::endl;
+    // std::cout << "threshold_low=" << threshold_low << " ; threshold_high=" << threshold_high << std::endl;
 
     cv::Canny(dx, dy, edge, threshold_low, threshold_high);
-    cv::imshow("pre edge", edge);
+    // cv::imshow("pre edge", edge);
 
     Mat1f direction_x = Mat1f::zeros(edge.rows, edge.cols), direction_y = Mat1f::zeros(edge.rows, edge.cols);
-    std::cout << "direction_x=" << direction_x.rows << "x" << direction_x.cols << std::endl;
-    std::cout << "direction_y=" << direction_y.rows << "x" << direction_y.cols << std::endl;
+    // std::cout << "direction_x=" << direction_x.rows << "x" << direction_x.cols << std::endl;
+    // std::cout << "direction_y=" << direction_y.rows << "x" << direction_y.cols << std::endl;
 
     for (int i = 0; i < edge.rows; ++i)
     {
@@ -159,8 +159,8 @@ void EdgeDetector::MarkEdgeCanny(const Mat1b &image, Mat1b &edge, cv::Mat2f &dir
     Mat1b direction_x_8u, direction_y_8u;
     convertScaleAbs(direction_x, direction_x_8u, 255);
     convertScaleAbs(direction_y, direction_y_8u, 255);
-    imshow("direction_x_8u", direction_x_8u);
-    imshow("direction_y_8u", direction_y_8u);
+    // imshow("direction_x_8u", direction_x_8u);
+    // imshow("direction_y_8u", direction_y_8u);
 }
 
 void EdgeDetector::ComputeThreshold(const Mat1b &dx, const Mat1b &dy, int &threshold_low,
